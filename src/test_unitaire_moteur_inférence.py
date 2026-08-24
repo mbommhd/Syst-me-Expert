@@ -60,7 +60,35 @@ def test_profil_bac():
         print(f"[PHASE 2 - OK] Motif : {b.get('motif')}")
     else:
         print("[PHASE 2 - ATTENTION] Aucune décision d'éligibilité générée.")
-        
+
+
+# Test unitaire global du processus d'orientation : PROFIL BAC+2
+################################################################
+def test_profil_bac2():
+    # Orientation en LIDA
+    
+    # Initialisation du moteur d'inférence
+    print("Initialisation du moteur d'inférence")
+    engine1 = moteur_inférence()
+    engine1.reset()
+    engine1.declare(niveau_étudiant(niveau= 'Bac+2'))
+    
+    # Déclarons les faits
+    print("Déclarons nos faits métiers")
+    engine1.declare(faits_métier(clé = 'filière_origine', valeur = 'Informatique'))
+    engine1.declare(faits_métier(clé = 'centre_interet', valeur = 'Data'))
+    
+    # Lançons le moteur d'inférence
+    print("Lancement du moteur d'inférence")
+    engine1.run()
+    
+    proposition = [f for f in engine1.facts.values() if isinstance(f, proposition_filière)]
+    assert len(proposition) == 1, ("Echec TEST 1: Une seule proposition attendue.")
+    assert proposition[0]['filière'] == 'Licence Pro LIDA', (f"Echec Test1: Attendu 'Licence Pro LIDA', obtenu"f"'{proposition[0]['filière']}'")
+    print("TEST 1 Réussi: Orientation Bac+2 en Licence Pro LIDA")
 # Lancement du test
 if __name__ == "__main__":
     test_profil_bac()
+    
+if __name__ == "__main__":
+    test_profil_bac2()

@@ -53,11 +53,11 @@ class y_n_éligible(Fact):
 class moteur_inférence(KnowledgeEngine):
     @Rule(niveau_étudiant(niveau='Bac'))
     def scenario_Bac(self):
-        self.declare(scénario_adéquat(scénario='scénario Bac'))
+        self.declare(scénario_adéquat(scénario='Bac'))
         
     @Rule(niveau_étudiant(niveau='Bac+2'))
     def scenario_Bac2(self):
-        self.declare(scénario_adéquat(scénario='scénario Bac+2'))
+        self.declare(scénario_adéquat(scénario='Bac+2'))
         
     # règles métiers dédiées au scénario BAC
     ########################################
@@ -138,7 +138,7 @@ class moteur_inférence(KnowledgeEngine):
         
     # Filière Chimie ou physique: Eligible pour les Bac C, E, F sans aucune condition de note
     @Rule(scénario_adéquat(scénario = 'Bac'), faits_métier(clé = 'filière choisie', valeur = MATCH.f), TEST(
-        lambda f: f in ['Chimie', 'Physique'], faits_métier(clé = 'série_bac', valeur = MATCH.s & TEST(lambda s: s in ['C', 'E', 'F']))))
+        lambda f: f in ['Chimie', 'Physique']), faits_métier(clé = 'série_bac', valeur = MATCH.s), TEST(lambda s: s in ['C', 'E', 'F']))
     def r_eli_05(self, f):
         self.declare(y_n_éligible(éligible = True, filière = f, motif = 'Félicitations + Document requis + Procédure \
             de préinscription en ligne'))
@@ -191,3 +191,60 @@ class moteur_inférence(KnowledgeEngine):
             requièrent baccalauréats scientifiques ou techniques."))
         
     
+    # règles métiers dédiées au scénario BAC+2
+    ##########################################
+    
+    # phase 1: Proposition de la filière
+    ####################################
+    
+    # Orientation en LIDA
+    @Rule(scénario_adéquat(scénario = 'Bac+2'), faits_métier(clé = "filière_origine", valeur = MATCH.f), TEST(lambda f: f in [
+        'Informatique', 'Mathématique', 'Physique', 'Génie Logiciel', 'Réseaux']), faits_métier(clé = 'centre_interet', valeur = MATCH.ci),
+          TEST( lambda ci: ci in ['code', 'Développement', 'Data', 'IA', 'Objet connectés']))
+    def règle_ori_bac2_LIDA(self):
+        self.declare(proposition_filière(id_règle = 'R_ori_bac2_01', filière = 'Licence Pro LIDA',
+        débouchés = 'Ingénieur en système embarqués, Développeur Web, Mobile, Logiciel, Analyste BI, Data Scientist'))
+        
+    # Orientation en TL
+    @Rule(scénario_adéquat(scénario = 'Bac+2'), faits_métier(clé = "filière_origine", valeur = MATCH.f), TEST(lambda f: f in [
+        'Chimie', 'Biochimie', 'Biologie', 'Science de la vie']), faits_métier(clé = 'centre_interet', valeur = MATCH.ci), 
+           TEST( lambda ci: ci in ['Laboratoire', 'Cosmétique']))
+    def règle_ori_bac2_TL(self):
+        self.declare(proposition_filière(id_règle = 'R_ori_bac2_02', filière = 'Licence Pro Techniques des Laboratoires',
+        débouchés = 'Analyste Biomédicale, Vétérinaire'))
+        
+    # Orientation en MIME
+    @Rule(scénario_adéquat(scénario = 'Bac+2'), faits_métier(clé = "filière_origine", valeur = MATCH.f), TEST(lambda f: f in [
+        'Biochimie', 'Microbiologie']), faits_métier(clé = 'centre_interet', valeur = MATCH.ci), TEST( lambda ci: ci in [
+            'Bactérie', 'Diagnostic', 'Santé', 'Virus']))
+    def règle_ori_bac2_MIME(self):
+        self.declare(proposition_filière(id_règle = 'R_ori_bac2_03', filière = 'Licence Pro MIME', débouchés = 'Industries Pharmaceutique, Industries des ferments'))
+    
+    # Orientation en filières classiques    
+    @Rule(scénario_adéquat(scénario = 'Bac+2'), faits_métier(clé = "filière_origine", valeur = MATCH.f), TEST(lambda f: f in [
+        'Mathématique', 'Physique', 'Chimie',]) , faits_métier(clé = 'centre_interet', valeur = MATCH.ci), TEST( lambda ci: ci in [
+            'Recherche', 'Enseignement', 'Doctorat', 'Longues études']))
+    def règle_ori_bac2_classique(self):
+        self.declare(proposition_filière(id_règle = 'R_ori_bac2_04', filière = 'Licence 3 classique', débouchés = 'Docteur, Professeur'))
+        
+    # phase 2: Vérification de l'éligibilité
+    ########################################
+    
+    # Licence Pro LIDA/TL/MIME ouverte aux Bac+ pro ou classiques
+    @Rule(scénario_adéquat(scénario = 'Bac+2'), faits_métier(clé = 'Cursus_choisi', valeur = MATCH.c), TEST(lambda c: c in [
+        'Licence Pro LIDA', 'Licence Pro MIME', 'Licence Pro Techniques des Laboratoires']), faits_métier(clé = 'type_bac2', valeur = MATCH.t),
+          TEST(lambda t: t in ['Classique', 'Professionel']))
+    def r_eli_bac2_01(self, c):
+        self.declare(y_n_éligible(éligible = True, filière = c, motif = "Dossier pré-validé + Document requis"))
+        
+    # L3 classique accessible si Bac+2 classique d'Université d'Etat
+    @Rule(scénario_adéquat(scénario = 'Bac+2'), faits_métier(clé = 'Cursus_choisi', valeur = 'Licence 3 Classique'),
+          faits_métier(clé = 'type_bac2', valeur = 'Classique'), faits_métier(clé = 'provenance', valeur = "Université d'Etat"))
+    def r_eli_bac2_02(self):
+        self.declare(y_n_éligible(éligible = True, filière='Licence 3 Calssique', motif = "Dossier pré-validé + Document requis"))
+        
+    # L3 classique resufé si Bac+2 professionnel
+    @Rule(scénario_adéquat(scénario = 'Bac+2'), faits_métier(clé = 'Cursus_choisi', valeur = 'Licence 3 Classique'),
+          faits_métier(clé = 'type_bac2', valeur = 'Professionnel'))
+    def r_eli_bac2_03(self):
+        self.declare(y_n_éligible(éligible = False, filière='Non éligibe en filière classique', motif = "Réorientation en filière pro selon le profil du candidat"))
