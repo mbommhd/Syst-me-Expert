@@ -60,7 +60,10 @@ class moteur_inférence(KnowledgeEngine):
         """Cette méthode convertit l'objet pydantic généré par le NLP en faits métiers pour le moteur d'inférence"""
         
         # Conversions de l'objet pydantic en dictionnaire python
-        données = pydantic_fact.model_dump()
+        if isinstance(pydantic_fact, dict):
+            données = pydantic_fact
+        else:
+            données = pydantic_fact.model_dump()
         
         # Niveau étudiant
         niveau_etu = données.get('niveau')
