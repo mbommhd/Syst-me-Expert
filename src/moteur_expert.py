@@ -301,11 +301,3 @@ if __name__ == '__main__':
 
     for fact_id, fact in moteur.facts.items():
         print(f"Fait {fact_id}: {dict(fact)}")
-        
-        
-        #matière préférée sciences biologiques
-            #@Rule(scénario_adéquat(scénario='Bac', étape='Orientation'), faits_métier(clé='matière préférée', valeur='sciences biologiques'))
-            #def règle_ori_bac_sciences_biologiques(self):
-                #self.declare(proposition_filière(id_règle='R_Ori_05', filière='Sciences Biologiques',
-                    #débouchés='Agronomie, Foresterie, Ecologie, Bio Informatique'))
-                #self.declare(scénario_adéquat(scénario='Bac', étape='Eligibilité'))
