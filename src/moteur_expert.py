@@ -69,17 +69,17 @@ class moteur_inférence(KnowledgeEngine):
         niveau_etu = données.get('niveau')
         if niveau_etu:
             self.declare(niveau_étudiant(niveau = niveau_etu))
-            # Mappage des clés pydantic vers les clés attendus les règles métiers
-            map_clé = {
-                'matière_préférée':'matière préférée', 'serie_bac':'série_bac', 'note_maths':'note_maths',
-                'note_physique':'note_physique', 'note_chimie':'note_chimie', 'filière_origine':'filière_origine',
-                'centre_interet':'centre_interet', 'cursus_choisi':'filière choisie', 'provenance_bac2':'provenance',
-                'type_bac2':'type_bac2'
+        # Mappage des clés pydantic vers les clés attendus les règles métiers
+        map_clé = {
+            'matière_préférée':'matière préférée', 'serie_bac':'série_bac', 'note_maths':'note_maths',
+            'note_physique':'note_physique', 'note_chimie':'note_chimie', 'filière_origine':'filière_origine',
+            'centre_interet':'centre_interet', 'cursus_choisi':'filière choisie', 'provenance_bac2':'provenance',
+            'type_bac2':'type_bac2'
             }
-            for cle_pydantic, valeur in données.items():
-                if cle_pydantic != 'niveau' and valeur is not None:
-                    cle_métier = map_clé.get(cle_pydantic, cle_pydantic)
-                    self.declare(faits_métier(clé = cle_métier, valeur = valeur))
+        for cle_pydantic, valeur in données.items():
+            if cle_pydantic != 'niveau' and valeur is not None:
+                cle_métier = map_clé.get(cle_pydantic, cle_pydantic)
+                self.declare(faits_métier(clé = cle_métier, valeur = valeur))
         
     @Rule(niveau_étudiant(niveau='Bac'))
     def scenario_Bac(self):
